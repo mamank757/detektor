@@ -149,7 +149,7 @@
 
 <script>
     let currentMode = 'soil';
-    const scriptURL = "https://script.google.com/macros/s/AKfycbyH5h63yuFe6AUgzPyPkFGOObemqzcd0rhYO2OpwOi2gursqR-vPHCXwW3iMqY5a0DTew/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyr7y5xEiQ933S1qBnGXTk2X42YNJAAbWgW6X57qjC3P19dtUY_mWzmp-lOFEJKfdcdMQ/exec";
 
      const kamusTanah = {
     "Alluvial": { "nama": "Tanah Alluvial", "pH": "6.0 - 7.0", "organik": "Sedang", "npk": "Tinggi", "subur": "Sangat Subur", "tanaman": "Padi, Palawija, Tebu", "saran": "Ideal untuk Padi. Jaga sirkulasi air." },
@@ -252,29 +252,29 @@
 }
 // Tambahkan fungsi ini di bawah fungsi analyze() Anda
     function displayResult(data) {
-        const resultDiv = document.getElementById('result');
-        const resLabel = document.getElementById('resLabel');
-        const resBody = document.getElementById('resBody');
-        
-        resultDiv.style.display = 'block';
-        resLabel.innerText = data.label;
-        
-        if (currentMode === 'soil') {
-            const info = kamusTanah[data.label] || { "nama": data.label, "pH": "-", "saran": "Data spesifik tidak ditemukan." };
-            resBody.innerHTML = `
-                <p><b>Akurasi:</b> ${data.confidence}%</p>
-                <p><b>Estimasi pH:</b> ${info.pH}</p>
-                <p style="border-top: 1px solid #444; padding-top: 10px;"><b>Rekomendasi PPL:</b><br>${info.saran}</p>
-            `;
-            drawTriangle(data.label);
-        } else {
-            const info = kamusDaun[data.label] || { "status": "Tidak Terdeteksi", "saran": "Pastikan pencahayaan cukup dan coba lagi." };
-            resBody.innerHTML = `
-                <p><b>Akurasi:</b> ${data.confidence}%</p>
-                <p><b>Status Nitrogen:</b> ${info.status}</p>
-                <p style="border-top: 1px solid #444; padding-top: 10px;"><b>Rekomendasi PPL:</b><br>${info.saran}</p>
-            `;
-        }
+    const resultDiv = document.getElementById('result');
+    const resLabel = document.getElementById('resLabel');
+    const resBody = document.getElementById('resBody');
+    
+    resultDiv.style.display = 'block';
+    resLabel.innerText = data.label;
+    
+    // Jika label dari model buah (Apple/Orange), kita beri pesan peringatan
+    if (data.label === "Apple" || data.label === "Orange" || data.confidence < 10) {
+        resBody.innerHTML = `<p style="color: #ff4444;">⚠️ AI mendeteksi '${data.label}'. Ini karena model aslinya belum dipasang di Roboflow Workflow.</p>`;
+        return;
+    }
+
+    // Jalankan logika kamus seperti biasa jika model sudah asli
+    if (currentMode === 'soil') {
+        const info = kamusTanah[data.label] || { "nama": data.label, "pH": "-", "saran": "Model belum dilatih sempurna." };
+        resBody.innerHTML = `<p><b>Akurasi:</b> ${data.confidence}%</p><p><b>Saran PPL:</b> ${info.saran}</p>`;
+        drawTriangle(data.label);
+    } else {
+        const info = kamusDaun[data.label] || { "status": "Tidak Terdeteksi", "saran": "Model BWD belum siap." };
+        resBody.innerHTML = `<p><b>Akurasi:</b> ${data.confidence}%</p><p><b>Saran PPL:</b> ${info.saran}</p>`;
+    }
+}
     }
 </script>
 </body>
