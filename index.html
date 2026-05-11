@@ -3,253 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UJI TANAH & BWD - PPL Wajo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>AI Padi Milenial - BPP Bola</title>
     <style>
-        :root {
-            --bg-color: #1a1412;
-            --card-bg: rgba(45, 38, 34, 0.85);
-            --accent-green: #2ecc71;
-            --accent-neon: #00ff88;
-            --text-color: #f5f5f5;
-            --border-color: rgba(46, 204, 113, 0.4);
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #121212; /* Dark Mode Solid */
-            background-image: radial-gradient(circle at 50% 50%, #2d2622 0%, #121212 100%);
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 92%;
-            max-width: 400px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            padding: 1.5rem;
-            border-radius: 25px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-        }
-
-        .mode-selector {
-            display: flex;
-            background: rgba(0,0,0,0.4);
-            border-radius: 12px;
-            margin-bottom: 20px;
-            padding: 4px;
-        }
-
-        .mode-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            color: #aaa;
-            background: transparent;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .mode-btn.active {
-            background: var(--accent-green);
-            color: #fff;
-            box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
-        }
-
-        .upload-area {
-            border: 2px dashed var(--accent-green);
-            padding: 1.5rem;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-bottom: 1.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            position: relative;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #preview { max-width: 100%; border-radius: 15px; display: none; border: 2px solid var(--accent-green); }
-
-        .scanner-line {
-            display: none;
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: var(--accent-neon);
-            box-shadow: 0 0 20px var(--accent-neon);
-            animation: scan 2s linear infinite;
-            z-index: 10;
-        }
-
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-
-        button#btnDetect {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            border: none;
-            color: #fff;
-            padding: 18px;
-            border-radius: 15px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: 800;
-            letter-spacing: 1px;
-            transition: 0.3s;
-        }
-
-        button#btnDetect:disabled { background: #555; cursor: not-allowed; }
-
-        #result {
-            margin-top: 1.5rem;
-            padding: 1.2rem;
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            border-left: 5px solid var(--accent-green);
-            text-align: left;
-        }
+        body { font-family: sans-serif; background: #0d1117; text-align: center; padding: 20px; color: white; }
+        .card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
+        #preview { width: 100%; border-radius: 10px; margin-top: 15px; display: none; border: 2px solid #238636; }
+        .btn { background: #238636; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-camera { background: #1f6feb; }
+        #result { text-align: left; background: #161b22; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 13px; display: none; border: 1px solid #30363d; }
+        .loading { display: none; margin-top: 10px; color: #8b949e; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 style="color: var(--accent-green); font-size: 1.5rem; margin-bottom: 5px;">PENYULUH MILENIAL</h1>
-    <p style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 20px;">Kecamatan Bola, Kabupaten Wajo</p>
-
-    <div class="mode-selector">
-        <button id="btnSoil" class="mode-btn active" onclick="switchMode('soil')">Cek Tanah</button>
-        <button id="btnLeaf" class="mode-btn" onclick="switchMode('leaf')">Cek BWD</button>
-    </div>
+<div class="card">
+    <h3>Deteksi Daun Padi</h3>
+    <p style="color: #8b949e;">BPP Kecamatan Bola</p>
     
-    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-        <div class="scanner-line" id="scanner"></div>
-        <img id="preview">
-        <p id="msg">📸 Ambil Foto Sampel</p>
-        <input type="file" id="fileInput" accept="image/*" hidden onchange="previewImage(event)">
-    </div>
-
-    <button id="btnDetect" onclick="analyze()">Analisis AI Sekarang</button>
-
-    <div id="result">
-        <h3 id="resLabel" style="color: var(--accent-neon); margin: 0; text-transform: uppercase;">Hasil Analisis</h3>
-        <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 10px 0;">
-        <div id="resBody" style="font-size: 0.9rem; line-height: 1.6;"></div>
-    </div>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;">
+    
+    <button class="btn btn-camera" onclick="document.getElementById('fileInput').click()">📸 Ambil Foto / Kamera</button>
+    
+    <img id="preview" src="" alt="Preview Gambar">
+    
+    <button id="uploadBtn" class="btn" style="display: none;" onclick="prosesUpload()">🚀 Analisis Sekarang</button>
+    
+    <div id="loading" class="loading">⏳ Sedang Menganalisis...</div>
+    <div id="result"></div>
 </div>
 
 <script>
-    let currentMode = 'soil';
-    // Ganti URL ini dengan URL Web App Apps Script Bapak yang sudah mendukung Roboflow API
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzfxfdo4v_MebVoKcuU528vQKGgO8pkDb55Fa_Ve8G5JmHNdywgRp3OFlRe_FqgVXWpqg/exec";
-
-    const kamusTanah = {
-        "Loamy": { "nama": "Lempung", "saran": "Sangat subur, cocok untuk padi & jagung." },
-        "Clay": { "nama": "Tanah Liat", "saran": "Drainase harus diperhatikan agar akar tidak busuk." },
-        "Sandy": { "nama": "Tanah Berpasir", "saran": "Butuh banyak kompos dan pengairan rutin." }
-    };
-
-    // Sesuaikan key dengan label yang Bapak buat di Roboflow (misal: kelas1, kelas2)
-    const kamusDaun = {
-        "kelas1": { "nama": "Skala 1", "status": "Sangat Kurang N", "saran": "Segera beri pupuk Urea dosis tinggi (100-125 kg/ha)." },
-        "kelas2": { "nama": "Skala 2", "status": "Kurang N", "saran": "Beri pupuk Urea dosis sedang (75 kg/ha)." },
-        "kelas3": { "nama": "Skala 3", "status": "Cukup", "saran": "Pantau seminggu lagi, pemupukan tunda dulu." },
-        "kelas4": { "nama": "Skala 4", "status": "Optimal", "saran": "Kondisi sangat baik, tidak perlu pupuk N." },
-        "kelas5": { "nama": "Skala 5", "status": "Berlebih", "saran": "Hentikan pupuk N, waspada serangan hama wereng." }
-    };
-
-    function switchMode(mode) {
-        currentMode = mode;
-        document.getElementById('btnSoil').classList.toggle('active', mode === 'soil');
-        document.getElementById('btnLeaf').classList.toggle('active', mode === 'leaf');
-        document.getElementById('msg').innerText = mode === 'soil' ? '📸 Foto Sampel Tanah' : '📸 Foto Daun Padi (BWD)';
-        document.getElementById('result').style.display = 'none';
-        document.getElementById('preview').style.display = 'none';
-        document.getElementById('msg').style.display = 'block';
-    }
-
-    function previewImage(event) {
-        const reader = new FileReader();
-        const output = document.getElementById('preview');
-        reader.onload = () => { 
-            output.src = reader.result; 
-            output.style.display = 'block';
-            document.getElementById('msg').style.display = 'none';
-        };
-        reader.readAsDataURL(event.target.files[0]);
-    }
-
-    async function analyze() {
-        const fileInput = document.getElementById('fileInput');
-        if (!fileInput.files[0]) return alert("Silakan ambil foto terlebih dahulu!");
-
-        const btn = document.getElementById('btnDetect');
-        const scanner = document.getElementById('scanner');
-        
-        btn.disabled = true;
-        btn.innerText = "Sedang Menganalisis...";
-        scanner.style.display = 'block';
-
-        const reader = new FileReader();
-        reader.onload = async () => {
-            const base64 = reader.result.split(',')[1];
-            try {
-                const response = await fetch(scriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify({ 
-                        image: base64, 
-                        mode: currentMode 
-                    })
-                });
-                const data = await response.json();
-                displayResult(data);
-            } catch (e) {
-                alert("Koneksi gagal! Pastikan Apps Script sudah di-deploy sebagai Web App.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Analisis AI Sekarang";
-                scanner.style.display = 'none';
-            }
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-    }
-
-   function displayResult(data) {
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const uploadBtn = document.getElementById('uploadBtn');
     const resultDiv = document.getElementById('result');
-    const resLabel = document.getElementById('resLabel');
-    const resBody = document.getElementById('resBody');
-    
-    resultDiv.style.display = 'block';
-    
-    // CEK APAKAH ADA ERROR DARI APPS SCRIPT
-    if (data.error) {
-        resLabel.innerText = "TIDAK TERDETEKSI";
-        resBody.innerHTML = `<p style="color: #ff4444;">${data.error}</p>`;
-        return;
-    }
+    const loading = document.getElementById('loading');
 
-    // Pastikan angka confidence ada, jika tidak beri angka 0
-    const akurasi = data.confidence ? Math.round(data.confidence) : 0;
-    
-    if (currentMode === 'soil') {
-        const info = kamusTanah[data.label] || { "nama": data.label, "saran": "Data belum tersedia." };
-        resLabel.innerText = "HASIL: " + info.nama;
-        resBody.innerHTML = `<b>Akurasi:</b> ${akurasi}% <br> <b>Saran:</b> ${info.saran}`;
-    } else {
-        const info = kamusDaun[data.label] || { "nama": data.label, "status": "Tidak Diketahui", "saran": "Pastikan foto daun jelas." };
-        resLabel.innerText = "BWD: " + (info.nama || "TIDAK DIKENAL");
-        resBody.innerHTML = `<b>Status:</b> ${info.status} <br> <b>Akurasi:</b> ${akurasi}% <br> <b>Tindakan:</b> ${info.saran}`;
+    let base64String = "";
+
+    // Ganti dengan URL Web App Google Apps Script Anda
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNxaXj7CMdRj_JuSrBwlnVNh7hksKQVgJPmaUT8vcALXoPjk8isQofvk0NXpk2krxf/exec";
+
+    // Kamus Penyakit & Solusi
+   const kamusTani = {
+    "Brown Spot": {
+        nama: "Bercak Cokelat (Brown Spot)",
+        gejalaDampak: "Muncul bintik kecil oval berwarna coklat tua dengan pusat abu-abu/putih dan tepian kuning (halo). Infeksi berat menyebabkan daun menguning, layu, dan gabah menjadi kopong.",
+        penyebab: "Jamur Bipolaris oryzae. Menyebar melalui angin dan percikan air. Risiko tinggi pada tanah masam atau kurang nutrisi (Silikon).",
+        pengendalian: "Gunakan benih bersertifikat, pemupukan seimbang (tambah Kalium & Silikon), dan fungisida berbahan aktif Difenokonazol atau Propikonazol."
+    },
+    "Blast": {
+        nama: "Penyakit Blast (Patah Leher)",
+        gejalaDampak: "Bercak berbentuk belah ketupat pada daun. Jika menyerang leher malai, malai akan patah dan gabah menjadi hampa/busuk.",
+        penyebab: "Jamur Pyricularia oryzae. Menyebar cepat pada suhu malam yang dingin dan kelembaban tinggi.",
+        pengendalian: "Kurangi pupuk Urea berlebih, gunakan varietas tahan, dan semprot fungisida sistemik berbahan aktif Trisiklazol."
+    },
+    "Nitrogen deficiency": {
+        nama: "Kekurangan Nitrogen (Kurang Urea)",
+        gejalaDampak: "Seluruh permukaan daun menguning seragam mulai dari daun yang paling tua/bawah, pertumbuhan tanaman terhambat.",
+        penyebab: "Kadar Nitrogen tanah rendah atau dosis pupuk tidak mencukupi kebutuhan fase pertumbuhan.",
+        pengendalian: "Tambahkan pupuk Urea sesuai rekomendasi E-RDKK atau bagan warna daun (BWD). Gunakan pupuk organik untuk menjaga kesuburan tanah."
+    },
+    "Phosphorus deficiency": {
+        nama: "Kekurangan Fosfor (Kurang SP-36)",
+        gejalaDampak: "Tanaman kerdil, jumlah anakan sedikit, daun tegak sempit dengan warna hijau gelap atau muncul warna ungu di ujung daun.",
+        penyesan: "Ketersediaan P rendah dalam tanah, sering terjadi pada tanah sawah yang terus menerus digenangi tanpa pengeringan.",
+        pengendalian: "Pemberian pupuk SP-36 atau TSP secara tepat. Lakukan pengeringan tanah secara berkala agar akar bisa menyerap P dengan baik."
+    },
+    "Potassium deficiency": {
+        nama: "Kekurangan Kalium (Kurang KCL)",
+        gejalaDampak: "Pinggiran daun menguning lalu menjadi cokelat seperti terbakar. Batang menjadi lemah dan tanaman mudah rebah atau terserang penyakit.",
+        penyebab: "Kurangnya asupan KCL atau tanah memiliki kemampuan ikat K yang rendah.",
+        pengendalian: "Gunakan pupuk KCL atau ZK. Kembalikan jerami ke sawah karena jerami mengandung banyak unsur Kalium."
+    },
+    "Tungro": {
+        nama: "Penyakit Tungro (Kerdil Kuning)",
+        gejalaDampak: "Tanaman menjadi sangat kerdil, daun berubah warna menjadi kuning oranye mulai dari pucuk ke pangkal daun tua.",
+        penyebab: "Virus yang ditularkan oleh hama Wereng Hijau (Nephotettix virescens).",
+        pengendalian: "Tanam serempak, cabut dan musnahkan tanaman yang sakit (eradikasi), dan kendalikan wereng hijau sejak dini."
     }
-}
+};
+
+    fileInput.onchange = e => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const scale = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    base64String = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+                    preview.src = canvas.toDataURL('image/jpeg');
+                    preview.style.display = 'block';
+                    uploadBtn.style.display = 'block';
+                    resultDiv.style.display = 'none';
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    async function prosesUpload() {
+        loading.style.display = 'block';
+        uploadBtn.disabled = true;
+        resultDiv.style.display = 'none';
+
+        try {
+            const resp = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ image: base64String })
+            });
+            const data = await resp.json();
+            
+            loading.style.display = 'none';
+            uploadBtn.disabled = false;
+            resultDiv.style.display = 'block';
+
+            // Ambil data prediksi pertama
+            const predictions = data.outputs[0].predictions.predictions;
+            if (predictions && predictions.length > 0) {
+                const prediksi = predictions[0];
+                const labelAI = prediksi.class;
+                const infoTani = kamusTani[labelAI] || { nama: labelAI, gejala: "-", solusi: "Hubungi petugas PPL terdekat." };
+
+               resultDiv.innerHTML = `
+    <div style="text-align: left; padding: 10px; border-radius: 10px;">
+        <h2 style="color: #FFD700; border-bottom: 2px solid #2ea043; padding-bottom: 5px;">📍 ${infoTani.nama}</h2>
+        <p style="margin: 10px 0;"><strong>Tingkat Keyakinan AI:</strong> ${(prediksi.confidence * 100).toFixed(0)}%</p>
+        
+        <div style="margin-bottom: 15px;">
+            <h4 style="color: #FFA500; margin-bottom: 5px;">🔍 Gejala dan Dampak</h4>
+            <p style="font-size: 0.95em; line-height: 1.5; color: #d1d5da;">${infoTani.gejalaDampak}</p>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <h4 style="color: #f85149; margin-bottom: 5px;">🧬 Penyebab dan Penyebaran</h4>
+            <p style="font-size: 0.95em; line-height: 1.5; color: #d1d5da;">${infoTani.penyebab}</p>
+        </div>
+
+        <div style="background: #1c2128; padding: 12px; border-radius: 8px; border-left: 5px solid #2ea043;">
+            <h4 style="color: #2ea043; margin-bottom: 5px;">✅ Pengendalian dan Pencegahan</h4>
+            <p style="font-size: 0.95em; line-height: 1.5; color: #e6edf3;">${infoTani.pengendalian}</p>
+        </div>
+
+        <h4 style="margin-top: 20px; color: #8b949e;">🖼️ Analisis Foto:</h4>
+        <img src="data:image/jpeg;base64,${data.outputs[0].annotated_image.value}" 
+             style="width:100%; border-radius:10px; border: 1px solid #30363d; margin-top: 5px;">
+    </div>
+`;
+            } else {
+                resultDiv.innerHTML = "<p>Daun tampak sehat atau objek tidak dikenali.</p>";
+                resultDiv.style.display = 'block';
+            }
+
+        } catch (err) {
+            loading.style.display = 'none';
+            uploadBtn.disabled = false;
+            alert("Gagal menganalisis gambar. Pastikan internet stabil.");
+            console.error(err);
+        }
+    }
 </script>
+
 </body>
 </html>
