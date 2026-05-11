@@ -3,175 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Padi Milenial - BPP Bola</title>
+    <title>PPL Milenial Wajo - AI Agriculture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #0d1117; text-align: center; padding: 20px; color: white; }
-        .card { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 15px; max-width: 400px; margin: auto; }
-        #preview { width: 100%; border-radius: 10px; margin-top: 15px; display: none; border: 2px solid #238636; }
-        .btn { background: #238636; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; margin-top: 10px; }
-        .btn-camera { background: #1f6feb; }
-        #result { text-align: left; background: #161b22; padding: 15px; border-radius: 10px; margin-top: 15px; font-size: 13px; display: none; border: 1px solid #30363d; }
-        .loading { display: none; margin-top: 10px; color: #8b949e; }
-    </style>
+    :root {
+        --bg-color: #0d1117;
+        --card-bg: #161b22;
+        --accent-green: #00ff88; /* Hijau neon lebih terang */
+        --accent-blue: #1f6feb;
+        --text-main: #ffffff;
+        --text-dim: #8b949e;
+        --border: #30363d;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        margin: 0;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .header { text-align: center; margin: 20px 0; }
+    .header h1 { margin: 0; font-size: 1.5rem; color: var(--accent-green); text-shadow: 0 0 10px rgba(0,255,136,0.3); }
+    .header p { margin: 0; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; }
+
+    /* TAB SYSTEM */
+    .tab-container {
+        display: flex;
+        background: var(--card-bg);
+        padding: 5px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 400px;
+        border: 1px solid var(--border);
+    }
+    .tab-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        background: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+    .tab-btn.active { background: var(--accent-green); color: #000; }
+    .tab-btn.active.soil-mode { background: #8b4513; color: white; }
+
+    /* CONTAINER SCANNER */
+    .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        padding: 20px;
+        border-radius: 25px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        box-sizing: border-box;
+    }
+
+    /* AREA PREVIEW DENGAN EFEK SCAN */
+    .scan-window {
+        position: relative;
+        border: 2px dashed var(--border);
+        padding: 10px;
+        border-radius: 20px;
+        margin: 15px 0;
+        overflow: hidden;
+        background: rgba(0,0,0,0.2);
+        min-height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #preview { width: 100%; border-radius: 15px; display: none; }
+
+    /* GARIS LASER */
+    .laser-line {
+        display: none;
+        position: absolute;
+        width: 100%;
+        height: 3px;
+        background: var(--accent-green);
+        box-shadow: 0 0 15px var(--accent-green);
+        z-index: 5;
+        animation: scanAnim 2s linear infinite;
+    }
+
+    @keyframes scanAnim {
+        0% { top: 0%; }
+        50% { top: 100%; }
+        100% { top: 0%; }
+    }
+
+    /* EFEK DIGITAL SAAT PROSES */
+    .is-scanning #preview {
+        filter: grayscale(1) brightness(0.8) sepia(1) hue-rotate(80deg);
+        opacity: 0.7;
+    }
+    .is-scanning .laser-line { display: block; }
+
+    .btn-main {
+        background: var(--accent-green);
+        color: #000;
+        border: none;
+        padding: 15px;
+        border-radius: 15px;
+        font-weight: 700;
+        width: 100%;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: 0.3s;
+    }
+    .btn-camera { background: var(--accent-blue); color: white; margin-bottom: 10px; }
+    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #result { margin-top: 20px; text-align: left; display: none; animation: fadeIn 0.5s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .info-box {
+        background: rgba(0,0,0,0.3);
+        padding: 12px;
+        border-radius: 12px;
+        margin-top: 10px;
+        border-left: 4px solid var(--accent-green);
+        font-size: 0.85rem;
+    }
+</style>
 </head>
 <body>
+    <div class="header">
+        <h1>PPL MILENIAL WAJO</h1>
+        <p>SMART FARMING AI ASSISTANT</p>
+    </div>
 
-<div class="card">
-    <h3>Deteksi Daun Padi</h3>
-    <p style="color: #8b949e;">BPP Kecamatan Bola</p>
-    
-    <input type="file" id="fileInput" accept="image/*" capture="environment" style="display: none;">
-    
-    <button class="btn btn-camera" onclick="document.getElementById('fileInput').click()">📸 Ambil Foto / Kamera</button>
-    
-    <img id="preview" src="" alt="Preview Gambar">
-    
-    <button id="uploadBtn" class="btn" style="display: none;" onclick="prosesUpload()">🚀 Analisis Sekarang</button>
-    
-    <div id="loading" class="loading">⏳ Sedang Menganalisis...</div>
-    <div id="result"></div>
-</div>
+    <div class="tab-container">
+        <button class="tab-btn active" id="tabDaun" onclick="switchMode('daun')">🍃 Deteksi Penyakit</button>
+        <button class="tab-btn" id="tabTanah" onclick="switchMode('tanah')">🏜️ Analisis Tanah</button>
+    </div>
 
-<script>
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const resultDiv = document.getElementById('result');
-    const loading = document.getElementById('loading');
+    <div class="card" id="mainCard">
+        <h3 id="modeTitle" style="margin-top:0;">Deteksi Penyakit Daun</h3>
+        <p id="modeDesc" style="font-size: 0.75rem; color: var(--text-dim); margin-bottom:20px;">Ambil foto sampel daun padi di lapangan.</p>
 
-    let base64String = "";
+        <input type="file" id="fileInput" accept="image/*" hidden onchange="handleFile(event)">
+        
+        <button class="btn-main btn-camera" onclick="document.getElementById('fileInput').click()">📸 Buka Kamera / Galeri</button>
 
-    // Ganti dengan URL Web App Google Apps Script Anda
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNxaXj7CMdRj_JuSrBwlnVNh7hksKQVgJPmaUT8vcALXoPjk8isQofvk0NXpk2krxf/exec";
+        <div class="scan-window" id="scanWindow" onclick="document.getElementById('fileInput').click()">
+            <div class="laser-line"></div>
+            <p id="msg" style="font-size: 0.8rem; opacity: 0.5; text-align:center;">Foto sampel akan muncul di sini</p>
+            <img id="preview">
+        </div>
 
-    // Kamus Penyakit & Solusi
-   const kamusTani = {
-    "Brown Spot": {
-        nama: "Bercak Cokelat (Brown Spot)",
-        gejalaDampak: "Muncul bintik kecil oval berwarna coklat tua dengan pusat abu-abu/putih dan tepian kuning (halo). Infeksi berat menyebabkan daun menguning, layu, dan gabah menjadi kopong.",
-        penyebab: "Jamur Bipolaris oryzae. Menyebar melalui angin dan percikan air. Risiko tinggi pada tanah masam atau kurang nutrisi (Silikon).",
-        pengendalian: "Gunakan benih bersertifikat, pemupukan seimbang (tambah Kalium & Silikon), dan fungisida berbahan aktif Difenokonazol atau Propikonazol."
+        <button id="btnAnalisis" class="btn-main" style="display: none;" onclick="mulaiAnalisis()">🚀 Mulai Pindai AI</button>
+        
+        <div id="loader" style="display:none; margin-top:15px; color:var(--accent-green); font-size:0.8rem; font-weight:bold;">
+            📡 MENGHUBUNGKAN KE SERVER ROBOLOFLOW...
+        </div>
+
+        <div id="result"></div>
+    </div>
+   <script>
+        let currentMode = 'daun';
+        let base64Image = "";
+
+        // URL Google Apps Script Anda
+        const URL_DAUN = "https://script.google.com/macros/s/AKfycbyNxaXj7CMdRj_JuSrBwlnVNh7hksKQVgJPmaUT8vcALXoPjk8isQofvk0NXpk2krxf/exec";
+        const URL_TANAH = "https://script.google.com/macros/s/AKfycbx0nIsCAsnKmQAJ4a1hc4FvHy6jqETLEaa2ouYtk8yuoTgrgIHKn9HUa-aYiMZsXejF3w/exec";
+
+        // Database Penyakit
+        const kamusTani = {
+            "brown spot": {
+                nama: "Bercak Cokelat (Brown Spot)",
+                gejala: "Bintik oval coklat tua dengan pusat abu-abu/putih. Infeksi berat menyebabkan daun menguning dan gabah kopong.",
+                penyebab: "Jamur Bipolaris oryzae. Risiko tinggi pada tanah masam atau kurang nutrisi (Silikon/Kalium).",
+                solusi: "Tambah pupuk Kalium & Silikon, gunakan benih bersertifikat, dan fungisida Difenokonazol."
+            },
+            "blast": {
+                nama: "Penyakit Blast (Patah Leher)",
+                gejala: "Bercak belah ketupat pada daun. Malai bisa patah dan busuk jika menyerang leher malai.",
+                penyebab: "Jamur Pyricularia oryzae. Dipicu kelembaban tinggi dan pemakaian Urea yang berlebihan.",
+                solusi: "Kurangi dosis Urea, gunakan varietas tahan, dan semprot fungisida sistemik (Trisiklazol)."
+            },
+            "tungro": {
+                nama: "Penyakit Tungro",
+                gejala: "Tanaman sangat kerdil, daun berubah warna menjadi kuning oranye mulai dari pucuk.",
+                penyebab: "Virus yang ditularkan oleh hama Wereng Hijau.",
+                solusi: "Tanam serempak, cabut tanaman yang sakit, dan kendalikan wereng hijau sejak dini."
+            },
+            "nitrogen deficiency": {
+                nama: "Kekurangan Nitrogen",
+                gejala: "Daun menguning seragam mulai dari daun tua (bawah). Pertumbuhan terhambat.",
+                penyebab: "Kadar Nitrogen tanah rendah atau dosis pupuk Urea tidak mencukupi.",
+                solusi: "Tambahkan pupuk Urea sesuai rekomendasi BWD (Bagan Warna Daun)."
+            }
+        };
+
+         const kamusTanah = {
+    "alluvial": { 
+        "nama": "Tanah Alluvial", 
+        "penjelasan": "Tanah yang terbentuk dari endapan material sedimen (lumpur, pasir, kerikil) yang terbawa aliran sungai. Ditemukan di dataran rendah atau delta. Sangat subur dan kaya unsur hara.",
+        "pH": "6.0 - 7.0", 
+        "organik": "Sedang", 
+        "subur": "Sangat Subur", 
+        "tanaman": "Padi, Jagung, Sayuran", 
+        "saran": "Ideal untuk Padi. Jaga sirkulasi air agar mineral tetap terjaga." 
     },
-    "Blast": {
-        nama: "Penyakit Blast (Patah Leher)",
-        gejalaDampak: "Bercak berbentuk belah ketupat pada daun. Jika menyerang leher malai, malai akan patah dan gabah menjadi hampa/busuk.",
-        penyebab: "Jamur Pyricularia oryzae. Menyebar cepat pada suhu malam yang dingin dan kelembaban tinggi.",
-        pengendalian: "Kurangi pupuk Urea berlebih, gunakan varietas tahan, dan semprot fungisida sistemik berbahan aktif Trisiklazol."
+    "clay": { 
+        "nama": "Tanah Liat (Clay)", 
+        "penjelasan": "Tanah dengan partikel mineral sangat halus. Memiliki kemampuan menahan air yang sangat kuat namun sulit ditembus air (drainase lambat). Bersifat lengket saat basah dan keras saat kering.",
+        "pH": "4.5 - 6.0", 
+        "organik": "Sedang", 
+        "subur": "Sedang", 
+        "tanaman": "Padi, Rumput Gajah", 
+        "saran": "Drainase wajib lancar. Tambahkan bahan organik untuk memperbaiki struktur tanah agar tidak terlalu padat." 
     },
-    "Nitrogen deficiency": {
-        nama: "Kekurangan Nitrogen (Kurang Urea)",
-        gejalaDampak: "Seluruh permukaan daun menguning seragam mulai dari daun yang paling tua/bawah, pertumbuhan tanaman terhambat.",
-        penyebab: "Kadar Nitrogen tanah rendah atau dosis pupuk tidak mencukupi kebutuhan fase pertumbuhan.",
-        pengendalian: "Tambahkan pupuk Urea sesuai rekomendasi E-RDKK atau bagan warna daun (BWD). Gunakan pupuk organik untuk menjaga kesuburan tanah."
+    "peat": { 
+        "nama": "Tanah Gambut (Peat)", 
+        "penjelasan": "Tanah yang terbentuk dari akumulasi sisa-sisa tumbuhan yang membusuk secara tidak sempurna di area yang selalu tergenang air (rawa). Memiliki kandungan bahan organik yang sangat tinggi.",
+        "pH": "3.0 - 5.0", 
+        "organik": "Sangat Tinggi", 
+        "subur": "Rendah (Asam)", 
+        "tanaman": "Kopi, Nanas, Sawit", 
+        "saran": "Berikan Dolomit (kapur pertanian) untuk menetralkan pH asam dan buat parit drainase yang baik." 
     },
-    "Phosphorus deficiency": {
-        nama: "Kekurangan Fosfor (Kurang SP-36)",
-        gejalaDampak: "Tanaman kerdil, jumlah anakan sedikit, daun tegak sempit dengan warna hijau gelap atau muncul warna ungu di ujung daun.",
-        penyesan: "Ketersediaan P rendah dalam tanah, sering terjadi pada tanah sawah yang terus menerus digenangi tanpa pengeringan.",
-        pengendalian: "Pemberian pupuk SP-36 atau TSP secara tepat. Lakukan pengeringan tanah secara berkala agar akar bisa menyerap P dengan baik."
+    "sandy": { 
+        "nama": "Tanah Berpasir", 
+        "penjelasan": "Tanah dengan partikel kasar yang tidak dapat menahan air dan unsur hara dengan baik. Teksturnya remah dan mudah diolah, namun cepat kering.",
+        "pH": "5.5 - 7.0", 
+        "organik": "Rendah", 
+        "subur": "Rendah", 
+        "tanaman": "Kelapa, Semangka, Ubi Kayu", 
+        "saran": "Wajib tambahkan kompos atau pupuk kandang dalam jumlah besar secara rutin untuk meningkatkan daya ikat air." 
     },
-    "Potassium deficiency": {
-        nama: "Kekurangan Kalium (Kurang KCL)",
-        gejalaDampak: "Pinggiran daun menguning lalu menjadi cokelat seperti terbakar. Batang menjadi lemah dan tanaman mudah rebah atau terserang penyakit.",
-        penyebab: "Kurangnya asupan KCL atau tanah memiliki kemampuan ikat K yang rendah.",
-        pengendalian: "Gunakan pupuk KCL atau ZK. Kembalikan jerami ke sawah karena jerami mengandung banyak unsur Kalium."
+    "red": { 
+        "nama": "Tanah Merah (Laterit)", 
+        "penjelasan": "Tanah yang kaya akan zat besi dan aluminium sehingga berwarna kemerahan. Terbentuk di daerah lembap dengan curah hujan tinggi yang membuat banyak unsur hara tercuci.",
+        "pH": "4.5 - 5.5", 
+        "organik": "Rendah", 
+        "subur": "Kurang", 
+        "tanaman": "Singkong, Karet, Jati", 
+        "saran": "Berikan pupuk Fosfat (SP-36) dosis ekstra dan perbanyak bahan organik untuk meningkatkan kesuburan." 
     },
-    "Tungro": {
-        nama: "Penyakit Tungro (Kerdil Kuning)",
-        gejalaDampak: "Tanaman menjadi sangat kerdil, daun berubah warna menjadi kuning oranye mulai dari pucuk ke pangkal daun tua.",
-        penyebab: "Virus yang ditularkan oleh hama Wereng Hijau (Nephotettix virescens).",
-        pengendalian: "Tanam serempak, cabut dan musnahkan tanaman yang sakit (eradikasi), dan kendalikan wereng hijau sejak dini."
+    "loam": { 
+        "nama": "Tanah Lempung (Loam)", 
+        "penjelasan": "Kombinasi ideal antara pasir, debu, dan sedikit liat. Tanah ini memiliki drainase yang baik sekaligus mampu menyimpan nutrisi dengan efektif. Teksturnya sangat remah.",
+        "pH": "6.0 - 7.0", 
+        "organik": "Tinggi", 
+        "subur": "Sangat Subur", 
+        "tanaman": "Palawija, Sayuran, Buah-buahan", 
+        "saran": "Pertahankan kualitas tanah dengan penggunaan pupuk organik secara konsisten. Tanah ini adalah emas bagi petani." 
+    },
+    "unlabeled": { 
+        "nama": "Objek Tidak Dikenali", 
+        "penjelasan": "AI tidak dapat memastikan jenis tanah dari foto ini.",
+        "saran": "Ambil foto kembali. Pastikan tanah bersih dari daun kering atau plastik, dan gunakan cahaya matahari yang terang." 
     }
 };
 
-    fileInput.onchange = e => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = event => {
-                const img = new Image();
-                img.src = event.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    const scale = MAX_WIDTH / img.width;
-                    canvas.width = MAX_WIDTH;
-                    canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    base64String = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-                    preview.src = canvas.toDataURL('image/jpeg');
-                    preview.style.display = 'block';
-                    uploadBtn.style.display = 'block';
-                    resultDiv.style.display = 'none';
-                };
-            };
-            reader.readAsDataURL(file);
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('tabDaun').className = mode === 'daun' ? 'tab-btn active' : 'tab-btn';
+            document.getElementById('tabTanah').className = mode === 'tanah' ? 'tab-btn active soil-mode' : 'tab-btn';
+            document.getElementById('modeTitle').innerText = mode === 'daun' ? 'Deteksi Penyakit Daun' : 'Analisis Jenis Tanah';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('msg').style.display = 'block';
+            document.getElementById('btnAnalisis').style.display = 'none';
         }
-    };
 
-    async function prosesUpload() {
-        loading.style.display = 'block';
-        uploadBtn.disabled = true;
-        resultDiv.style.display = 'none';
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 800;
+                        const scale = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scale;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+                        document.getElementById('preview').src = canvas.toDataURL('image/jpeg');
+                        document.getElementById('preview').style.display = 'block';
+                        document.getElementById('msg').style.display = 'none';
+                        document.getElementById('btnAnalisis').style.display = 'block';
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        }
 
-        try {
-            const resp = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ image: base64String })
-            });
-            const data = await resp.json();
+        async function mulaiAnalisis() {
+            const scanWindow = document.getElementById('scanWindow');
+            const loader = document.getElementById('loader');
+            const btn = document.getElementById('btnAnalisis');
             
-            loading.style.display = 'none';
-            uploadBtn.disabled = false;
-            resultDiv.style.display = 'block';
+            scanWindow.classList.add('is-scanning');
+            loader.style.display = 'block';
+            btn.disabled = true;
 
-            // Ambil data prediksi pertama
-            const predictions = data.outputs[0].predictions.predictions;
-            if (predictions && predictions.length > 0) {
-                const prediksi = predictions[0];
-                const labelAI = prediksi.class;
-                const infoTani = kamusTani[labelAI] || { nama: labelAI, gejala: "-", solusi: "Hubungi petugas PPL terdekat." };
+            try {
+                const targetUrl = (currentMode === 'daun') ? URL_DAUN : URL_TANAH;
+                const response = await fetch(targetUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ image: base64Image })
+                });
+                const data = await response.json();
+                tampilkanHasil(data);
+            } catch (err) {
+                alert("Gagal terhubung ke AI. Pastikan internet stabil!");
+            } finally {
+                scanWindow.classList.remove('is-scanning');
+                loader.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
 
-               resultDiv.innerHTML = `
-    <div style="text-align: left; padding: 10px; border-radius: 10px;">
-        <h2 style="color: #FFD700; border-bottom: 2px solid #2ea043; padding-bottom: 5px;">📍 ${infoTani.nama}</h2>
-        <p style="margin: 10px 0;"><strong>Tingkat Keyakinan AI:</strong> ${(prediksi.confidence * 100).toFixed(0)}%</p>
-        
-        <div style="margin-bottom: 15px;">
-            <h4 style="color: #FFA500; margin-bottom: 5px;">🔍 Gejala dan Dampak</h4>
-            <p style="font-size: 0.95em; line-height: 1.5; color: #d1d5da;">${infoTani.gejalaDampak}</p>
-        </div>
+      function tampilkanHasil(data) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.style.display = 'block';
+    
+    let labelRaw = "Unlabeled";
+    let conf = 0;
 
-        <div style="margin-bottom: 15px;">
-            <h4 style="color: #f85149; margin-bottom: 5px;">🧬 Penyebab dan Penyebaran</h4>
-            <p style="font-size: 0.95em; line-height: 1.5; color: #d1d5da;">${infoTani.penyebab}</p>
-        </div>
+    // Logika pembacaan JSON yang lebih kuat (Mengikuti kode Deteksi Tanah Anda)
+    try {
+        if (data.outputs && data.outputs[0]) {
+            const outputBlok = data.outputs[0];
+            let foundBlock = null;
 
-        <div style="background: #1c2128; padding: 12px; border-radius: 8px; border-left: 5px solid #2ea043;">
-            <h4 style="color: #2ea043; margin-bottom: 5px;">✅ Pengendalian dan Pencegahan</h4>
-            <p style="font-size: 0.95em; line-height: 1.5; color: #e6edf3;">${infoTani.pengendalian}</p>
-        </div>
-
-        <h4 style="margin-top: 20px; color: #8b949e;">🖼️ Analisis Foto:</h4>
-        <img src="data:image/jpeg;base64,${data.outputs[0].annotated_image.value}" 
-             style="width:100%; border-radius:10px; border: 1px solid #30363d; margin-top: 5px;">
-    </div>
-`;
-            } else {
-                resultDiv.innerHTML = "<p>Daun tampak sehat atau objek tidak dikenali.</p>";
-                resultDiv.style.display = 'block';
+            // Mencari blok data yang berisi hasil prediksi
+            for (let key in outputBlok) {
+                if (outputBlok[key].predicted_classes) { 
+                    foundBlock = outputBlok[key]; 
+                    break; 
+                } else if (outputBlok[key].predictions && Array.isArray(outputBlok[key].predictions)) {
+                    // Antisipasi format Roboflow Object Detection (Daun)
+                    foundBlock = {
+                        predicted_classes: [outputBlok[key].predictions[0].class],
+                        confidence: outputBlok[key].predictions[0].confidence
+                    };
+                    break;
+                }
             }
 
-        } catch (err) {
-            loading.style.display = 'none';
-            uploadBtn.disabled = false;
-            alert("Gagal menganalisis gambar. Pastikan internet stabil.");
-            console.error(err);
+            if (foundBlock) {
+                labelRaw = foundBlock.predicted_classes[0];
+                // Mengambil confidence score
+                let confidenceValue = foundBlock.confidence || 
+                                     (foundBlock.predictions && foundBlock.predictions[labelRaw] ? foundBlock.predictions[labelRaw].confidence : 0.8);
+                conf = (confidenceValue * 100).toFixed(1);
+            }
         }
+    } catch (e) {
+        console.error("Gagal parsing data:", e);
     }
-</script>
 
+    const labelKey = labelRaw.toLowerCase();
+
+    if (currentMode === 'daun') {
+        const info = kamusTani[labelKey] || { nama: labelRaw, gejala: "-", penyebab: "-", solusi: "Konsultasi ke BPP Bola." };
+        resultDiv.innerHTML = `
+            <div style="border-top: 1px solid var(--border); padding-top: 15px;">
+                <h3 style="color:var(--accent-green); margin:0;">📍 ${info.nama}</h3>
+                <p style="font-size:0.75rem; color:#ffd700; margin-bottom:15px;">Keyakinan AI: ${conf}%</p>
+                <div class="info-box"><strong>🔍 Gejala & Dampak:</strong><br>${info.gejala || info.gejalaDampak}</div>
+                <div class="info-box" style="border-left-color:#f85149;"><strong>🧬 Penyebab:</strong><br>${info.penyebab}</div>
+                <div class="info-box" style="border-left-color:#ffd700;"><strong>✅ Saran Pengendalian:</strong><br>${info.solusi || info.pengendalian}</div>
+            </div>
+        `;
+    } else {
+    const info = kamusTanah[labelKey] || kamusTanah["unlabeled"];
+    resultDiv.innerHTML = `
+        <div style="border-top: 1px solid var(--border); padding-top: 15px;">
+            <h3 style="color:#ffd700; margin:0;">${info.nama}</h3>
+            <p style="font-size:0.75rem; color:var(--text-dim); margin: 10px 0;">${info.penjelasan}</p>
+            
+            <table style="width:100%; font-size:0.85rem; border-collapse:collapse; margin-top:10px;">
+                <tr><td style="padding:8px 0; border-bottom:1px solid #333;">Kesuburan</td><td style="text-align:right; color:var(--accent-green); font-weight:bold;">${info.subur}</td></tr>
+                <tr><td style="padding:8px 0; border-bottom:1px solid #333;">Estimasi pH</td><td style="text-align:right; color:var(--accent-green); font-weight:bold;">${info.pH}</td></tr>
+                <tr><td style="padding:8px 0; border-bottom:1px solid #333;">Tanaman Cocok</td><td style="text-align:right; color:var(--accent-green); font-weight:bold;">${info.tanaman || '-'}</td></tr>
+            </table>
+            
+            <div class="info-box" style="border-left-color:#ffd700; margin-top:15px;">
+                <strong>💡 Saran PPL:</strong><br>${info.saran}
+            </div>
+        </div>
+    `;
+}
+}
+    </script>
 </body>
 </html>
