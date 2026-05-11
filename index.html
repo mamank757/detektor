@@ -150,7 +150,7 @@
 <script>
     let currentMode = 'soil';
     // Ganti URL ini dengan URL Web App Apps Script Bapak yang sudah mendukung Roboflow API
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwBfbmEwQGkWMBJnxb7Mxo2nF9Gc9kxQOl0SeMN6eDtadXXUg0mrnGcnzv7xlqFhDcgbg/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbzFM1oIuTT9dcqHTLZhHt2nsL8FRv9qvICZjCemBCiZUXRvJItrnIv4kQ2tymdtWKtqUw/exec";
 
     const kamusTanah = {
         "Loamy": { "nama": "Lempung", "saran": "Sangat subur, cocok untuk padi & jagung." },
@@ -223,23 +223,33 @@
         reader.readAsDataURL(fileInput.files[0]);
     }
 
-    function displayResult(data) {
-        const resultDiv = document.getElementById('result');
-        const resLabel = document.getElementById('resLabel');
-        const resBody = document.getElementById('resBody');
-        
-        resultDiv.style.display = 'block';
-        
-        if (currentMode === 'soil') {
-            const info = kamusTanah[data.label] || { "nama": data.label, "saran": "Data belum tersedia." };
-            resLabel.innerText = "HASIL: " + info.nama;
-            resBody.innerHTML = `<b>Kepercayaan:</b> ${Math.round(data.confidence)}% <br> <b>Saran:</b> ${info.saran}`;
-        } else {
-            const info = kamusDaun[data.label] || { "nama": data.label, "status": "Tidak Diketahui", "saran": "Pastikan foto daun jelas." };
-            resLabel.innerText = "BWD: " + info.nama;
-            resBody.innerHTML = `<b>Status:</b> ${info.status} <br> <b>Akurasi:</b> ${Math.round(data.confidence)}% <br> <b>Tindakan:</b> ${info.saran}`;
-        }
+   function displayResult(data) {
+    const resultDiv = document.getElementById('result');
+    const resLabel = document.getElementById('resLabel');
+    const resBody = document.getElementById('resBody');
+    
+    resultDiv.style.display = 'block';
+    
+    // CEK APAKAH ADA ERROR DARI APPS SCRIPT
+    if (data.error) {
+        resLabel.innerText = "TIDAK TERDETEKSI";
+        resBody.innerHTML = `<p style="color: #ff4444;">${data.error}</p>`;
+        return;
     }
+
+    // Pastikan angka confidence ada, jika tidak beri angka 0
+    const akurasi = data.confidence ? Math.round(data.confidence) : 0;
+    
+    if (currentMode === 'soil') {
+        const info = kamusTanah[data.label] || { "nama": data.label, "saran": "Data belum tersedia." };
+        resLabel.innerText = "HASIL: " + info.nama;
+        resBody.innerHTML = `<b>Akurasi:</b> ${akurasi}% <br> <b>Saran:</b> ${info.saran}`;
+    } else {
+        const info = kamusDaun[data.label] || { "nama": data.label, "status": "Tidak Diketahui", "saran": "Pastikan foto daun jelas." };
+        resLabel.innerText = "BWD: " + (info.nama || "TIDAK DIKENAL");
+        resBody.innerHTML = `<b>Status:</b> ${info.status} <br> <b>Akurasi:</b> ${akurasi}% <br> <b>Tindakan:</b> ${info.saran}`;
+    }
+}
 </script>
 </body>
 </html>
