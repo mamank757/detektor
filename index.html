@@ -111,6 +111,10 @@
             </div>
 
             <div id="boxTanah" style="display:none;">
+                <div class="info-box" style="border-left-color: var(--accent-soil);">
+                    <strong>📊 Analisis Distribusi:</strong>
+                    <div id="soilList" style="margin-top: 10px; font-size: 0.75rem;"></div>
+                </div>
                 <div class="info-box" style="border-left-color:#1f6feb; margin-bottom:15px;">
                     <strong>📖 Deskripsi Tanah:</strong><br><span id="resPenjelasan">-</span>
                 </div>
@@ -120,7 +124,7 @@
                     <tr><td>Estimasi pH</td><td class="row-val" id="resPH">-</td></tr>
                 </table>
                 <div class="info-box" style="border-left-color:#ffd700;"><strong>💡 Saran PPL:</strong><br><span id="resSaran">-</span></div>
-                <canvas id="textureTriangle" width="300" height="200" style="width: 100%; margin-top: 15px;"></canvas>
+                <canvas id="textureTriangle" width="300" height="250" style="width: 100%; margin-top: 15px;"></canvas>
             </div>
             
             <img id="resultImg" style="margin-top:15px; border:1px solid var(--border);">
@@ -134,7 +138,7 @@
     const URL_DAUN = "https://script.google.com/macros/s/AKfycbyCYh65h_3lT4iWr97_RHJNZmaPTSHDp_uFPy_pAP_rvC5BxYHI1n3dn5iwrnNcER1X/exec";
     const URL_TANAH = "https://script.google.com/macros/s/AKfycbx0nIsCAsnKmQAJ4a1hc4FvHy6jqETLEaa2ouYtk8yuoTgrgIHKn9HUa-aYiMZsXejF3w/exec";
 
-    const kamusTani = {
+     const kamusTani = {
         "healthy": { 
             nama: "Tanaman Sehat", 
             gejala: "Warna hijau segar, pertumbuhan normal tanpa bercak.", 
@@ -285,6 +289,7 @@
     }
 };
 
+
     function switchMode(mode) {
         currentMode = mode;
         const color = mode === 'daun' ? 'var(--accent-green)' : 'var(--accent-soil)';
@@ -345,8 +350,8 @@
         let label = "unlabeled", conf = 0;
 
         if (currentMode === 'daun') {
-            if (out.classification_result) {
-                const res = out.classification_result;
+            const res = out.predictions || out.classification_result;
+            if (res) {
                 label = (res.top || "unlabeled").toLowerCase().replace(/ /g, "_");
                 conf = ((res.confidence || 0) * 100).toFixed(1);
             }
@@ -364,9 +369,42 @@
         } else {
             let foundBlock = null;
             for (let key in out) { if (out[key].predicted_classes) { foundBlock = out[key]; break; } }
-            if (foundBlock) {
+            if (foundBlock && foundBlock.predictions) {
+                const preds = foundBlock.predictions;
+                const container = document.getElementById('soilList');
+                container.innerHTML = "";
+
+                let sortedSoil = Object.keys(preds).sort((a, b) => {
+                    let valA = typeof preds[a] === 'number' ? preds[a] : preds[a].confidence;
+                    let valB = typeof preds[b] === 'number' ? preds[b] : preds[b].confidence;
+                    return valB - valA;
+                });
+
+               sortedSoil.forEach(soilKey => {
+    const p = preds[soilKey];
+    const cVal = ((typeof p === 'number' ? p : p.confidence) * 100).toFixed(2);
+    
+    // Mengambil nama asli Bahasa Indonesia dari Kamus Tanah
+    // Jika tidak ada di kamus, gunakan nama asli dari AI (dengan format rapi)
+    const namaIndonesia = kamusTanah[soilKey.toLowerCase()] 
+                          ? kamusTanah[soilKey.toLowerCase()].nama 
+                          : soilKey.toUpperCase().replace(/_/g, ' ');
+
+    container.innerHTML += `
+        <div style="margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                <span style="color: var(--text-main); font-weight: 600;">${namaIndonesia}</span>
+                <span style="color: var(--accent-soil);">${cVal}%</span>
+            </div>
+            <div style="background: #333; height: 6px; border-radius: 3px; margin-top: 4px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #ffd700, #ff8c00); width: ${cVal}%; height: 100%; border-radius: 3px; transition: width 1s ease-in-out;"></div>
+            </div>
+        </div>`;
+});
+
                 label = foundBlock.predicted_classes[0].toLowerCase().replace(/ /g, "_");
-                conf = (foundBlock.predictions[foundBlock.predicted_classes[0]].confidence * 100).toFixed(1);
+                const pTop = preds[foundBlock.predicted_classes[0]];
+                conf = ((typeof pTop === 'number' ? pTop : pTop.confidence) * 100).toFixed(1);
             }
             const info = kamusTanah[label] || kamusTanah.unlabeled;
             document.getElementById('resLabel').innerText = info.nama;
@@ -380,15 +418,78 @@
         document.getElementById('resConf').innerText = `Akurasi: ${conf}%`;
     }
 
-    function drawTriangle(l) {
-        const c = document.getElementById('textureTriangle');
-        const ctx = c.getContext('2d');
-        ctx.clearRect(0,0,300,200);
-        ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(150,10); ctx.lineTo(20,180); ctx.lineTo(280,180); ctx.closePath(); ctx.stroke();
-        let dot = {x:150, y:100};
-        if(l.includes('clay')) dot={x:150, y:50}; else if(l.includes('sandy')) dot={x:70, y:150};
-        ctx.fillStyle='#ff4d4d'; ctx.beginPath(); ctx.arc(dot.x, dot.y, 6, 0, 7); ctx.fill();
+    function drawTriangle(label) {
+        const canvas = document.getElementById('textureTriangle');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const top = { x: 150, y: 45 };      
+        const left = { x: 45, y: 215 };     
+        const right = { x: 255, y: 215 };   
+
+        // 1. Background Glow
+        const bgGrad = ctx.createRadialGradient(150, 130, 10, 150, 130, 120);
+        bgGrad.addColorStop(0, 'rgba(0, 255, 136, 0.05)');
+        bgGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, 300, 250);
+
+        // 2. Garis Kisi (Grid)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i < 10; i++) {
+            let ratio = i / 10;
+            let y = 215 - (ratio * 170);
+            let xS = 45 + (ratio * 105 * 0.5);
+            let xE = 255 - (ratio * 105 * 0.5);
+            ctx.beginPath(); ctx.moveTo(xS, y); ctx.lineTo(xE, y); ctx.stroke();
+        }
+
+        // 3. Segitiga Utama (Neon)
+        ctx.save();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = 'rgba(0, 255, 136, 0.5)';
+        ctx.strokeStyle = '#00ff88';
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.beginPath(); 
+        ctx.moveTo(top.x, top.y); 
+        ctx.lineTo(left.x, left.y); 
+        ctx.lineTo(right.x, right.y); 
+        ctx.closePath(); 
+        ctx.stroke();
+        ctx.restore();
+
+        // 4. Label Sudut
+        ctx.fillStyle = '#00ff88';
+        ctx.font = 'bold 12px Poppins';
+        ctx.textAlign = 'center';
+        ctx.fillText("LIAT (CLAY)", top.x, top.y - 15);
+        ctx.textAlign = 'right';
+        ctx.fillText("PASIR", left.x - 10, left.y + 5);
+        ctx.textAlign = 'left';
+        ctx.fillText("DEBU", right.x + 10, right.y + 5);
+
+        // 5. Posisi Titik
+        let dot = { x: 150, y: 130 };
+        const labelLower = label.toLowerCase();
+        if (labelLower.includes("clay")) dot = { x: 150, y: 80 };
+        else if (labelLower.includes("sandy")) dot = { x: 85, y: 190 };
+        else if (labelLower.includes("loam")) dot = { x: 150, y: 170 };
+        else if (labelLower.includes("alluvial")) dot = { x: 215, y: 190 };
+
+        // 6. Titik Deteksi (Pulse)
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(231, 76, 60, 0.3)';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, 5, 0, Math.PI * 2);
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#ff4d4d";
+        ctx.fillStyle = '#ff4d4d';
+        ctx.fill();
     }
 </script>
 </body>
