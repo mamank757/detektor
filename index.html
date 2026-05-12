@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PPL Milenial Wajo - AI Agriculture</title>
+    <title>PPL Milenial Wajo - Smart Farming</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
     :root {
         --bg-color: #0d1117;
         --card-bg: #161b22;
-        --accent-green: #00ff88; /* Hijau neon lebih terang */
-        --accent-blue: #1f6feb;
+        --accent-green: #00ff88;
+        --accent-soil: #ffd700;
         --text-main: #ffffff;
-        --text-dim: #8b949e;
         --border: #30363d;
     }
 
@@ -20,193 +19,164 @@
         font-family: 'Poppins', sans-serif;
         background-color: var(--bg-color);
         color: var(--text-main);
-        margin: 0;
-        padding: 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh;
+        margin: 0; padding: 10px;
+        display: flex; flex-direction: column; align-items: center; min-height: 100vh;
     }
 
     .header { text-align: center; margin: 20px 0; }
     .header h1 { margin: 0; font-size: 1.5rem; color: var(--accent-green); text-shadow: 0 0 10px rgba(0,255,136,0.3); }
-    .header p { margin: 0; font-size: 0.8rem; color: var(--text-dim); letter-spacing: 2px; }
 
-    /* TAB SYSTEM */
     .tab-container {
-        display: flex;
-        background: var(--card-bg);
-        padding: 5px;
-        border-radius: 15px;
-        margin-bottom: 20px;
-        width: 100%;
-        max-width: 400px;
-        border: 1px solid var(--border);
+        display: flex; background: var(--card-bg); padding: 5px; border-radius: 15px;
+        margin-bottom: 20px; width: 100%; max-width: 420px; border: 1px solid var(--border);
     }
     .tab-btn {
-        flex: 1;
-        padding: 10px;
-        border: none;
-        background: none;
-        color: var(--text-dim);
-        cursor: pointer;
-        font-weight: 600;
-        border-radius: 12px;
-        transition: 0.3s;
+        flex: 1; padding: 12px; border: none; background: none; color: #8b949e;
+        cursor: pointer; font-weight: 600; border-radius: 12px; transition: 0.3s;
     }
     .tab-btn.active { background: var(--accent-green); color: #000; }
-    .tab-btn.active.soil-mode { background: #8b4513; color: white; }
+    .tab-btn.active.soil-mode { background: var(--accent-soil); color: #000; }
 
-    /* CONTAINER SCANNER */
     .card {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        padding: 20px;
-        border-radius: 25px;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        box-sizing: border-box;
+        background: var(--card-bg); border: 1px solid var(--border); padding: 20px;
+        border-radius: 25px; max-width: 420px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
 
-    /* AREA PREVIEW DENGAN EFEK SCAN */
     .scan-window {
-        position: relative;
-        border: 2px dashed var(--border);
-        padding: 10px;
-        border-radius: 20px;
-        margin: 15px 0;
-        overflow: hidden;
-        background: rgba(0,0,0,0.2);
-        min-height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        position: relative; border: 2px dashed var(--border); border-radius: 20px; 
+        margin: 15px 0; overflow: hidden; min-height: 150px; display: flex; align-items: center; justify-content: center;
     }
 
-    #preview { width: 100%; border-radius: 15px; display: none; }
-
-    /* GARIS LASER */
+    #preview, #resultImg { width: 100%; border-radius: 15px; display: none; }
     .laser-line {
-        display: none;
-        position: absolute;
-        width: 100%;
-        height: 3px;
-        background: var(--accent-green);
-        box-shadow: 0 0 15px var(--accent-green);
-        z-index: 5;
-        animation: scanAnim 2s linear infinite;
+        display: none; position: absolute; width: 100%; height: 3px;
+        background: var(--accent-green); box-shadow: 0 0 15px var(--accent-green);
+        z-index: 5; animation: scanAnim 2s linear infinite;
     }
-
-    @keyframes scanAnim {
-        0% { top: 0%; }
-        50% { top: 100%; }
-        100% { top: 0%; }
-    }
-
-    /* EFEK DIGITAL SAAT PROSES */
-    .is-scanning #preview {
-        filter: grayscale(1) brightness(0.8) sepia(1) hue-rotate(80deg);
-        opacity: 0.7;
-    }
+    @keyframes scanAnim { 0% { top: 0%; } 50% { top: 100%; } 100% { top: 0%; } }
     .is-scanning .laser-line { display: block; }
 
     .btn-main {
-        background: var(--accent-green);
-        color: #000;
-        border: none;
-        padding: 15px;
-        border-radius: 15px;
-        font-weight: 700;
-        width: 100%;
-        cursor: pointer;
-        text-transform: uppercase;
-        transition: 0.3s;
+        background: var(--accent-green); color: #000; border: none; padding: 15px;
+        border-radius: 15px; font-weight: 700; width: 100%; cursor: pointer; text-transform: uppercase;
     }
-    .btn-camera { background: var(--accent-blue); color: white; margin-bottom: 10px; }
-    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-camera { background: #1f6feb; color: white; margin-bottom: 10px; }
 
-    #result { margin-top: 20px; text-align: left; display: none; animation: fadeIn 0.5s; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+    #result { margin-top: 20px; display: none; }
     .info-box {
-        background: rgba(0,0,0,0.3);
-        padding: 12px;
-        border-radius: 12px;
-        margin-top: 10px;
-        border-left: 4px solid var(--accent-green);
-        font-size: 0.85rem;
+        background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;
+        margin-top: 10px; border-left: 4px solid var(--accent-green); font-size: 0.8rem;
     }
-</style>
+    .row-val { font-weight: 600; text-align: right; color: var(--accent-green); }
+    table { width: 100%; font-size: 0.8rem; border-collapse: collapse; margin: 10px 0;}
+    td { padding: 8px 0; border-bottom: 1px solid #333; }
+    </style>
 </head>
 <body>
+
     <div class="header">
         <h1>PPL MILENIAL WAJO</h1>
-        <p>SMART FARMING AI ASSISTANT</p>
+        <p style="font-size: 0.7rem; color: #f5e505; letter-spacing: 2px;">SMART FARMING - Deteksi Daun & Deteksi Tekstur Tanah</p>
     </div>
 
     <div class="tab-container">
-        <button class="tab-btn active" id="tabDaun" onclick="switchMode('daun')">🍃 Deteksi Penyakit</button>
-        <button class="tab-btn" id="tabTanah" onclick="switchMode('tanah')">🏜️ Analisis Tanah</button>
+        <button class="tab-btn active" id="tabDaun" onclick="switchMode('daun')">🍃 Padi</button>
+        <button class="tab-btn" id="tabTanah" onclick="switchMode('tanah')">🏜️ Tanah</button>
     </div>
 
-    <div class="card" id="mainCard">
-        <h3 id="modeTitle" style="margin-top:0;">Deteksi Penyakit Daun</h3>
-        <p id="modeDesc" style="font-size: 0.75rem; color: var(--text-dim); margin-bottom:20px;">Ambil foto sampel daun padi di lapangan.</p>
-
-        <input type="file" id="fileInput" accept="image/*" hidden onchange="handleFile(event)">
+    <div class="card">
+        <h3 id="modeTitle" style="margin-top:0; color: var(--accent-green);">Deteksi Penyakit Padi</h3>
         
-        <button class="btn-main btn-camera" onclick="document.getElementById('fileInput').click()">📸 Buka Kamera / Galeri</button>
+        <input type="file" id="fileInput" accept="image/*" hidden onchange="handleFile(event)">
+        <button class="btn-main btn-camera" onclick="document.getElementById('fileInput').click()">📸 AMBIL FOTO/GALERI</button>
 
-        <div class="scan-window" id="scanWindow" onclick="document.getElementById('fileInput').click()">
-            <div class="laser-line"></div>
-            <p id="msg" style="font-size: 0.8rem; opacity: 0.5; text-align:center;">Foto sampel akan muncul di sini</p>
+        <div class="scan-window" id="scanWindow">
+            <div class="laser-line" id="laser"></div>
+            <p id="msg" style="font-size: 0.8rem; opacity: 0.5;">Pratinjau foto sampel</p>
             <img id="preview">
         </div>
 
-        <button id="btnAnalisis" class="btn-main" style="display: none;" onclick="mulaiAnalisis()">🚀 Mulai Pindai AI</button>
+        <button id="btnAnalisis" class="btn-main" style="display: none;" onclick="mulaiAnalisis()">🚀 MULAI ANALISIS AI</button>
         
-        <div id="loader" style="display:none; margin-top:15px; color:var(--accent-green); font-size:0.8rem; font-weight:bold;">
-            📡 MENGHUBUNGKAN KE SERVER ROBOLOFLOW...
+        <div id="loader" style="display:none; text-align:center; margin-top:10px; font-size:0.7rem; color:var(--accent-green);">📡 MENGHUBUNGKAN SERVER AI...</div>
+
+        <div id="result">
+            <div id="resLabel" style="font-size: 1.2rem; font-weight: 800; color: var(--accent-green); text-align: center;">-</div>
+            <div id="resConf" style="font-size: 0.75rem; text-align: center; margin-bottom: 15px; color: #ffd700;">Akurasi: 0%</div>
+            
+            <div id="boxPenyakit">
+                <div class="info-box"><strong>🔍 Gejala:</strong><br><span id="resGejala">-</span></div>
+                <div class="info-box" style="border-left-color:#f85149;"><strong>🧬 Penyebab:</strong><br><span id="resPenyebab">-</span></div>
+                <div class="info-box" style="border-left-color:#ffd700;"><strong>✅ Solusi:</strong><br><span id="resSolusi">-</span></div>
+            </div>
+
+            <div id="boxTanah" style="display:none;">
+                <div class="info-box" style="border-left-color:#1f6feb; margin-bottom:15px;">
+                    <strong>📖 Deskripsi Tanah:</strong><br><span id="resPenjelasan">-</span>
+                </div>
+                <table>
+                    <tr><td>Kesuburan</td><td class="row-val" id="resSubur">-</td></tr>
+                    <tr><td>Bahan Organik</td><td class="row-val" id="resOrganik">-</td></tr>
+                    <tr><td>Estimasi pH</td><td class="row-val" id="resPH">-</td></tr>
+                </table>
+                <div class="info-box" style="border-left-color:#ffd700;"><strong>💡 Saran PPL:</strong><br><span id="resSaran">-</span></div>
+                <canvas id="textureTriangle" width="300" height="200" style="width: 100%; margin-top: 15px;"></canvas>
+            </div>
+            
+            <img id="resultImg" style="margin-top:15px; border:1px solid var(--border);">
         </div>
-
-        <div id="result"></div>
     </div>
-   <script>
-        let currentMode = 'daun';
-        let base64Image = "";
 
-        // URL Google Apps Script Anda
-        const URL_DAUN = "https://script.google.com/macros/s/AKfycbyNxaXj7CMdRj_JuSrBwlnVNh7hksKQVgJPmaUT8vcALXoPjk8isQofvk0NXpk2krxf/exec";
-        const URL_TANAH = "https://script.google.com/macros/s/AKfycbx0nIsCAsnKmQAJ4a1hc4FvHy6jqETLEaa2ouYtk8yuoTgrgIHKn9HUa-aYiMZsXejF3w/exec";
+<script>
+    let currentMode = 'daun';
+    let base64Image = "";
 
-        // Database Penyakit
-        const kamusTani = {
-            "brown spot": {
-                nama: "Bercak Cokelat (Brown Spot)",
-                gejala: "Bintik oval coklat tua dengan pusat abu-abu/putih. Infeksi berat menyebabkan daun menguning dan gabah kopong.",
-                penyebab: "Jamur Bipolaris oryzae. Risiko tinggi pada tanah masam atau kurang nutrisi (Silikon/Kalium).",
-                solusi: "Tambah pupuk Kalium & Silikon, gunakan benih bersertifikat, dan fungisida Difenokonazol."
-            },
-            "blast": {
-                nama: "Penyakit Blast (Patah Leher)",
-                gejala: "Bercak belah ketupat pada daun. Malai bisa patah dan busuk jika menyerang leher malai.",
-                penyebab: "Jamur Pyricularia oryzae. Dipicu kelembaban tinggi dan pemakaian Urea yang berlebihan.",
-                solusi: "Kurangi dosis Urea, gunakan varietas tahan, dan semprot fungisida sistemik (Trisiklazol)."
-            },
-            "tungro": {
-                nama: "Penyakit Tungro",
-                gejala: "Tanaman sangat kerdil, daun berubah warna menjadi kuning oranye mulai dari pucuk.",
-                penyebab: "Virus yang ditularkan oleh hama Wereng Hijau.",
-                solusi: "Tanam serempak, cabut tanaman yang sakit, dan kendalikan wereng hijau sejak dini."
-            },
-            "nitrogen deficiency": {
-                nama: "Kekurangan Nitrogen",
-                gejala: "Daun menguning seragam mulai dari daun tua (bawah). Pertumbuhan terhambat.",
-                penyebab: "Kadar Nitrogen tanah rendah atau dosis pupuk Urea tidak mencukupi.",
-                solusi: "Tambahkan pupuk Urea sesuai rekomendasi BWD (Bagan Warna Daun)."
-            }
-        };
+    const URL_DAUN = "https://script.google.com/macros/s/AKfycbyCYh65h_3lT4iWr97_RHJNZmaPTSHDp_uFPy_pAP_rvC5BxYHI1n3dn5iwrnNcER1X/exec";
+    const URL_TANAH = "https://script.google.com/macros/s/AKfycbx0nIsCAsnKmQAJ4a1hc4FvHy6jqETLEaa2ouYtk8yuoTgrgIHKn9HUa-aYiMZsXejF3w/exec";
+
+    const kamusTani = {
+        "healthy": { 
+            nama: "Tanaman Sehat", 
+            gejala: "Warna hijau segar, pertumbuhan normal tanpa bercak.", 
+            penyebab: "Kondisi lingkungan dan nutrisi optimal.",
+            solusi: "Lanjutkan pemupukan berimbang dan pantau secara rutin." 
+        },
+        "bacterial_leaf_blight": { 
+            nama: "Hawar Daun Bakteri (Kresek)", 
+            gejala: "Garis kuning/oranye di sepanjang pinggir daun yang mengering.", 
+            penyebab: "Bakteri Xanthomonas oryzae.",
+            solusi: "Gunakan bakterisida, pastikan sirkulasi air sawah lancar, kurangi Urea." 
+        },
+        "brown_spot": { 
+            nama: "Bercak Cokelat (Brown Spot)", 
+            gejala: "Bintik cokelat bulat atau oval merata di permukaan daun.", 
+            penyebab: "Jamur Bipolaris oryzae. Sering terjadi pada tanah kurang nutrisi.",
+            solusi: "Cukupi kebutuhan Kalium (KCL) dan pastikan drainase lancar." 
+        },
+        "leaf_blast": { 
+            nama: "Penyakit Blast", 
+            gejala: "Bercak cokelat berbentuk belah ketupat dengan pusat abu-abu.", 
+            penyebab: "Jamur Pyricularia oryzae.",
+            solusi: "Semprot fungisida sistemik (Trisiklazol), kurangi dosis Nitrogen." 
+        },
+        "leaf_scald": { 
+            nama: "Luka Daun (Leaf Scald)", 
+            gejala: "Bercak besar berbentuk perahu yang mengering di ujung daun.", 
+            penyebab: "Jamur Microdochium oryzae.",
+            solusi: "Gunakan varietas tahan dan atur jarak tanam jangan terlalu rapat." 
+        },
+        "narrow_brown_spot": { 
+            nama: "Bercak Cokelat Sempit", 
+            gejala: "Garis-garis cokelat sempit searah dengan tulang daun.", 
+            penyebab: "Jamur Cercospora janseana.",
+            solusi: "Tambah dosis pupuk Kalium dan perbaiki sistem pengairan." 
+        },
+        "unlabeled": { 
+            nama: "Objek Tidak Dikenali", 
+            gejala: "-", penyebab: "-", 
+            solusi: "Pastikan foto DAUN fokus, dekat, dan cahaya terang." 
+        }
+    };
 
          const kamusTanah = {
     "alluvial": { 
@@ -270,142 +240,111 @@
     }
 };
 
-        function switchMode(mode) {
-            currentMode = mode;
-            document.getElementById('tabDaun').className = mode === 'daun' ? 'tab-btn active' : 'tab-btn';
-            document.getElementById('tabTanah').className = mode === 'tanah' ? 'tab-btn active soil-mode' : 'tab-btn';
-            document.getElementById('modeTitle').innerText = mode === 'daun' ? 'Deteksi Penyakit Daun' : 'Analisis Jenis Tanah';
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('preview').style.display = 'none';
-            document.getElementById('msg').style.display = 'block';
-            document.getElementById('btnAnalisis').style.display = 'none';
-        }
-
-        function handleFile(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 800;
-                        const scale = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scale;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-                        document.getElementById('preview').src = canvas.toDataURL('image/jpeg');
-                        document.getElementById('preview').style.display = 'block';
-                        document.getElementById('msg').style.display = 'none';
-                        document.getElementById('btnAnalisis').style.display = 'block';
-                    }
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        async function mulaiAnalisis() {
-            const scanWindow = document.getElementById('scanWindow');
-            const loader = document.getElementById('loader');
-            const btn = document.getElementById('btnAnalisis');
-            
-            scanWindow.classList.add('is-scanning');
-            loader.style.display = 'block';
-            btn.disabled = true;
-
-            try {
-                const targetUrl = (currentMode === 'daun') ? URL_DAUN : URL_TANAH;
-                const response = await fetch(targetUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ image: base64Image })
-                });
-                const data = await response.json();
-                tampilkanHasil(data);
-            } catch (err) {
-                alert("Gagal terhubung ke AI. Pastikan internet stabil!");
-            } finally {
-                scanWindow.classList.remove('is-scanning');
-                loader.style.display = 'none';
-                btn.disabled = false;
-            }
-        }
-
-      function tampilkanHasil(data) {
-    const resultDiv = document.getElementById('result');
-    resultDiv.style.display = 'block';
-    
-    let labelRaw = "Unlabeled";
-    let conf = 0;
-
-    // Logika pembacaan JSON yang lebih kuat (Mengikuti kode Deteksi Tanah Anda)
-    try {
-        if (data.outputs && data.outputs[0]) {
-            const outputBlok = data.outputs[0];
-            let foundBlock = null;
-
-            // Mencari blok data yang berisi hasil prediksi
-            for (let key in outputBlok) {
-                if (outputBlok[key].predicted_classes) { 
-                    foundBlock = outputBlok[key]; 
-                    break; 
-                } else if (outputBlok[key].predictions && Array.isArray(outputBlok[key].predictions)) {
-                    // Antisipasi format Roboflow Object Detection (Daun)
-                    foundBlock = {
-                        predicted_classes: [outputBlok[key].predictions[0].class],
-                        confidence: outputBlok[key].predictions[0].confidence
-                    };
-                    break;
-                }
-            }
-
-            if (foundBlock) {
-                labelRaw = foundBlock.predicted_classes[0];
-                // Mengambil confidence score
-                let confidenceValue = foundBlock.confidence || 
-                                     (foundBlock.predictions && foundBlock.predictions[labelRaw] ? foundBlock.predictions[labelRaw].confidence : 0.8);
-                conf = (confidenceValue * 100).toFixed(1);
-            }
-        }
-    } catch (e) {
-        console.error("Gagal parsing data:", e);
+    function switchMode(mode) {
+        currentMode = mode;
+        const color = mode === 'daun' ? 'var(--accent-green)' : 'var(--accent-soil)';
+        document.getElementById('tabDaun').className = mode === 'daun' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('tabTanah').className = mode === 'tanah' ? 'tab-btn active soil-mode' : 'tab-btn';
+        document.getElementById('modeTitle').innerText = mode === 'daun' ? 'Deteksi Penyakit Padi' : 'Analisis Jenis Tanah';
+        document.getElementById('modeTitle').style.color = color;
+        document.getElementById('laser').style.background = color;
+        document.getElementById('result').style.display = 'none';
+        document.getElementById('preview').style.display = 'none';
+        document.getElementById('msg').style.display = 'block';
+        document.getElementById('btnAnalisis').style.display = 'none';
     }
 
-    const labelKey = labelRaw.toLowerCase();
+    function handleFile(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 800; canvas.height = (img.height * 800) / img.width;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                base64Image = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+                document.getElementById('preview').src = canvas.toDataURL('image/jpeg');
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('msg').style.display = 'none';
+                document.getElementById('btnAnalisis').style.display = 'block';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
 
-    if (currentMode === 'daun') {
-        const info = kamusTani[labelKey] || { nama: labelRaw, gejala: "-", penyebab: "-", solusi: "Konsultasi ke BPP Bola." };
-        resultDiv.innerHTML = `
-            <div style="border-top: 1px solid var(--border); padding-top: 15px;">
-                <h3 style="color:var(--accent-green); margin:0;">📍 ${info.nama}</h3>
-                <p style="font-size:0.75rem; color:#ffd700; margin-bottom:15px;">Keyakinan AI: ${conf}%</p>
-                <div class="info-box"><strong>🔍 Gejala & Dampak:</strong><br>${info.gejala || info.gejalaDampak}</div>
-                <div class="info-box" style="border-left-color:#f85149;"><strong>🧬 Penyebab:</strong><br>${info.penyebab}</div>
-                <div class="info-box" style="border-left-color:#ffd700;"><strong>✅ Saran Pengendalian:</strong><br>${info.solusi || info.pengendalian}</div>
-            </div>
-        `;
-    } else {
-    const info = kamusTanah[labelKey] || kamusTanah["unlabeled"];
-    resultDiv.innerHTML = `
-        <div style="border-top: 1px solid var(--border); padding-top: 15px;">
-            <h3 style="color:#ffd700; margin:0;">${info.nama}</h3>
-            <p style="font-size:0.75rem; color:var(--text-dim); margin: 10px 0;">${info.penjelasan}</p>
+    async function mulaiAnalisis() {
+        document.getElementById('scanWindow').classList.add('is-scanning');
+        document.getElementById('loader').style.display = 'block';
+        try {
+            const url = currentMode === 'daun' ? URL_DAUN : URL_TANAH;
+            const res = await fetch(url, { method: 'POST', body: JSON.stringify({ image: base64Image }) });
+            const data = await res.json();
+            tampilkanHasil(data);
+        } catch (e) { alert("Koneksi gagal!"); }
+        document.getElementById('scanWindow').classList.remove('is-scanning');
+        document.getElementById('loader').style.display = 'none';
+    }
+
+    function tampilkanHasil(data) {
+        let out = Array.isArray(data) ? data[0] : data;
+        if (out.outputs && out.outputs[0]) out = out.outputs[0];
+
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('boxPenyakit').style.display = currentMode === 'daun' ? 'block' : 'none';
+        document.getElementById('boxTanah').style.display = currentMode === 'tanah' ? 'block' : 'none';
+        document.getElementById('resultImg').style.display = 'none';
+
+        let label = "unlabeled", conf = 0;
+
+        if (currentMode === 'daun') {
+            if (out.classification_result) {
+                const res = out.classification_result;
+                label = (res.top || "unlabeled").toLowerCase().replace(/ /g, "_");
+                conf = ((res.confidence || 0) * 100).toFixed(1);
+            }
+            const info = kamusTani[label] || kamusTani.unlabeled;
+            document.getElementById('resLabel').innerText = info.nama;
+            document.getElementById('resGejala').innerText = info.gejala;
+            document.getElementById('resPenyebab').innerText = info.penyebab || "-";
+            document.getElementById('resSolusi').innerText = info.solusi;
             
-            <table style="width:100%; font-size:0.85rem; border-collapse:collapse; margin-top:10px;">
-                <tr><td style="padding:8px 0; border-bottom:1px solid #333;">Kesuburan</td><td style="text-align:right; color:var(--accent-green); font-weight:bold;">${info.subur}</td></tr>
-                <tr><td style="padding:8px 0; border-bottom:1px solid #333;">Estimasi pH</td><td style="text-align:right; color:var(--accent-green); font-weight:bold;">${info.pH}</td></tr>
-                <tr><td style="padding:8px 0; border-bottom:1px solid #333;">Tanaman Cocok</td><td style="text-align:right; color:var(--accent-green); font-weight:bold;">${info.tanaman || '-'}</td></tr>
-            </table>
-            
-            <div class="info-box" style="border-left-color:#ffd700; margin-top:15px;">
-                <strong>💡 Saran PPL:</strong><br>${info.saran}
-            </div>
-        </div>
-    `;
-}
-}
-    </script>
+            if(out.annotated_image) {
+                document.getElementById('resultImg').src = "data:image/jpeg;base64," + (out.annotated_image.value || out.annotated_image);
+                document.getElementById('resultImg').style.display = 'block';
+                document.getElementById('preview').style.display = 'none';
+            }
+        } else {
+            let foundBlock = null;
+            for (let key in out) { if (out[key].predicted_classes) { foundBlock = out[key]; break; } }
+            if (foundBlock) {
+                label = foundBlock.predicted_classes[0].toLowerCase().replace(/ /g, "_");
+                conf = (foundBlock.predictions[foundBlock.predicted_classes[0]].confidence * 100).toFixed(1);
+            }
+            const info = kamusTanah[label] || kamusTanah.unlabeled;
+            document.getElementById('resLabel').innerText = info.nama;
+            document.getElementById('resPenjelasan').innerText = info.penjelasan || "-";
+            document.getElementById('resSubur').innerText = info.subur || '-';
+            document.getElementById('resOrganik').innerText = info.organik || '-';
+            document.getElementById('resPH').innerText = info.pH || '-';
+            document.getElementById('resSaran').innerText = info.saran || '-';
+            drawTriangle(label);
+        }
+        document.getElementById('resConf').innerText = `Akurasi: ${conf}%`;
+    }
+
+    function drawTriangle(l) {
+        const c = document.getElementById('textureTriangle');
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0,0,300,200);
+        ctx.strokeStyle = '#00ff88'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(150,10); ctx.lineTo(20,180); ctx.lineTo(280,180); ctx.closePath(); ctx.stroke();
+        let dot = {x:150, y:100};
+        if(l.includes('clay')) dot={x:150, y:50}; else if(l.includes('sandy')) dot={x:70, y:150};
+        ctx.fillStyle='#ff4d4d'; ctx.beginPath(); ctx.arc(dot.x, dot.y, 6, 0, 7); ctx.fill();
+    }
+</script>
 </body>
 </html>
